@@ -16,9 +16,9 @@ An [Artists & Robots](https://artistsandrobots.com) project by [Jason Alan Snyde
 
 ## Why this exists
 
-I'm the co-founder of [Artists & Robots](https://artistsandrobots.com) and [SuperTruth](https://supertruth.ai). For the SuperTruth blog, I wanted isometric stacked-cube charts — the kind that make data feel dimensional — generated server-side so they could be embedded directly in blog posts, emails, and dynamically generated images.
+I'm the co-founder of [Artists & Robots](https://artistsandrobots.com) and [SuperTruth](https://supertruth.ai). For the SuperTruth blog, I wanted beautiful isometric stacked-cube charts — the kind that make data feel dimensional — that I could generate in Node.js and embed directly in posts, emails, and images without spinning up a browser.
 
-There was no library that did this. Everything was browser-only, a Chrome extension, or a React component. Getting [obelisk.js](https://github.com/nosir/obelisk.js) — the only serious isometric canvas library — running inside Node.js with [node-canvas](https://github.com/Automattic/node-canvas) and JSDOM took a few days of real pain. The result now powers every chart on [supertruth.ai/blog](https://supertruth.ai/blog). I figured others would benefit from having this solved.
+I couldn't find a good, simple solution. Everything was browser-only, a Chrome extension, or a React component. Getting [obelisk.js](https://github.com/nosir/obelisk.js) — the only serious isometric canvas library — running inside Node.js with [node-canvas](https://github.com/Automattic/node-canvas) and JSDOM took a few days of real pain. I built stax so nobody else has to go through that. The charts on [supertruth.ai/blog](https://supertruth.ai/blog) are the live proof it works.
 
 ---
 
@@ -127,7 +127,7 @@ await s3.send(new PutObjectCommand({
 
 ## Real output
 
-These charts are generated server-side on [supertruth.ai/blog](https://supertruth.ai/blog) using stax. Every post gets a chart — rendered at write time, embedded inline, no client-side code.
+These charts appear on [supertruth.ai/blog](https://supertruth.ai/blog) and were made with stax — generated in Node.js and embedded directly in each post.
 
 **[Leukemia patient community: what behavioral signals precede treatment decisions?](https://supertruth.ai/blog/leukemia-patient-community-behavior-what-online-signals-precede-treatment-decisi)**
 
@@ -259,7 +259,7 @@ The JSDOM instance and obelisk.js evaluation are lazy and cached — the first c
 
 ## Used by
 
-**[SuperTruth](https://supertruth.ai)** — healthcare intelligence platform. Generates isometric charts for every post on [supertruth.ai/blog](https://supertruth.ai/blog) using stax. Charts are rendered server-side during post generation and embedded as inline PNG data URIs — no CDN, no client-side rendering, no build step.
+**[SuperTruth](https://supertruth.ai)** — healthcare intelligence platform. The charts throughout [supertruth.ai/blog](https://supertruth.ai/blog) are made with stax: generated in Node.js, embedded directly in posts as PNG.
 
 ---
 
