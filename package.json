@@ -1,0 +1,46 @@
+{
+  "name": "@artistsandrobots/stax",
+  "version": "0.1.0",
+  "description": "Server-side isometric 3D bar chart generation for Node.js. No browser. No external service. Pure PNG output.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && cp -r src/vendor dist/vendor",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "isometric",
+    "chart",
+    "node",
+    "canvas",
+    "png",
+    "visualization",
+    "server-side",
+    "artists-and-robots"
+  ],
+  "author": "Jason Alan Snyder <jas@evilrobot.com> (https://evilrobot.com)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/evil-robot/stax.git"
+  },
+  "homepage": "https://github.com/evil-robot/stax#readme",
+  "bugs": {
+    "url": "https://github.com/evil-robot/stax/issues"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "canvas": "^3.2.3",
+    "jsdom": "^29.1.1"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^28.0.1",
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
