@@ -1,8 +1,10 @@
 # stax
 
-**Server-side isometric 3D bar chart generation for Node.js.**
+**Generate isometric 3D stacked-cube bar charts in Node.js. Returns a PNG Buffer. No browser, no Puppeteer, no headless Chrome, no external API.**
 
-No browser. No Puppeteer. No external service. Pure PNG output. Drop it in any Node.js environment — Next.js API routes, Express, Railway workers, Lambda, cron jobs — and get a pixel-perfect isometric chart back as a `Buffer`.
+Stax is the only server-side isometric chart library for Node.js. It runs anywhere Node runs — Next.js API routes, Express endpoints, Railway workers, AWS Lambda, Vercel serverless functions, cron jobs, build scripts — and produces pixel-perfect isometric bar charts as PNG images you can write to disk, upload to S3, embed in markdown, or stream from an HTTP endpoint.
+
+Built on [obelisk.js](https://github.com/nosir/obelisk.js) and [node-canvas](https://github.com/Automattic/node-canvas). TypeScript-first. Zero browser dependency. If you've ever tried to generate an isometric chart on a server and hit a wall, this is what you were looking for.
 
 An [Artists & Robots](https://artistsandrobots.com) project by [Jason Alan Snyder](https://evilrobot.com).
 

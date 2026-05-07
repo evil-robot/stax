@@ -1,7 +1,7 @@
 {
   "name": "@artistsandrobots/stax",
   "version": "0.1.0",
-  "description": "Server-side isometric 3D bar chart generation for Node.js. No browser. No external service. Pure PNG output.",
+  "description": "Generate isometric 3D stacked-cube bar charts in Node.js. Returns a PNG Buffer. No browser, no Puppeteer, no headless Chrome. Works in Next.js, Express, Lambda, Railway, and anywhere Node runs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -14,12 +14,23 @@
   },
   "keywords": [
     "isometric",
+    "isometric-chart",
+    "3d-chart",
+    "bar-chart",
+    "stacked-chart",
     "chart",
     "node",
+    "nodejs",
     "canvas",
+    "node-canvas",
     "png",
+    "image-generation",
     "visualization",
     "server-side",
+    "server-side-rendering",
+    "obelisk",
+    "nextjs",
+    "lambda",
     "artists-and-robots"
   ],
   "author": "Jason Alan Snyder <jas@evilrobot.com> (https://evilrobot.com)",
