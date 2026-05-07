@@ -164,7 +164,9 @@ renderChart(spec: ChartSpec): Buffer
 | `height` | `number` | `540` | Canvas height in px. |
 | `brandText` | `string` | stax attribution | Text in the bottom brand strip. Pass `""` to hide it entirely. |
 | `brandLogo` | `string` | — | Absolute path to a logo image file. Drawn left of `brandText`. |
-| `palette` | `number[]` | teal gradient | Cube face colors as hex integers. Ordered light → dark (base → top of stack). |
+| `accentColor` | `string` | — | Single hex color. Auto-generates a 4-shade gradient and tints the markers. Overrides `palette`. |
+| `theme` | `"light" \| "dark"` | `"light"` | `"dark"` flips to a slate-900 background with adjusted card and text colors. |
+| `palette` | `(string \| number)[]` | teal gradient | Cube colors light → dark. Accepts `"#14B8A6"` or `0x14B8A6`. |
 
 ### Notes
 
@@ -207,19 +209,37 @@ export const PALETTE = {
 };
 ```
 
-### Custom palette per render
+### accentColor — one line, full gradient
 
-Pass any array of hex integers. obelisk.js derives the left and right face shading automatically from the top-face color.
+Pass a single hex color and stax auto-generates a 4-shade light-to-dark gradient and tints the markers to match.
 
 ```ts
-// Indigo
+renderChart({ ...spec, accentColor: "#6366F1" }); // indigo
+renderChart({ ...spec, accentColor: "#F43F5E" }); // rose
+renderChart({ ...spec, accentColor: "#8B5CF6" }); // violet
+```
+
+![Indigo accent](docs/example-indigo.png)
+
+### theme: "dark"
+
+```ts
+renderChart({ ...spec, theme: "dark" });
+renderChart({ ...spec, theme: "dark", accentColor: "#8B5CF6" });
+```
+
+![Dark violet](docs/example-dark-violet.png)
+
+### Custom palette
+
+For precise control, pass an array of colors light → dark. Accepts hex strings or integers — both work.
+
+```ts
+// hex strings
+renderChart({ ...spec, palette: ["#FCD34D", "#FBBF24", "#F59E0B", "#D97706"] });
+
+// hex integers (also fine)
 renderChart({ ...spec, palette: [0x6366F1, 0x4F46E5, 0x4338CA, 0x3730A3] });
-
-// Rose
-renderChart({ ...spec, palette: [0xFB7185, 0xF43F5E, 0xE11D48, 0xBE123C] });
-
-// Amber
-renderChart({ ...spec, palette: [0xFBBF24, 0xF59E0B, 0xD97706, 0xB45309] });
 ```
 
 ---
