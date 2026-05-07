@@ -487,10 +487,9 @@ export function renderChart(spec: ChartSpec): Buffer {
   }
 
   const smoothCtx = ctx as unknown as { imageSmoothingEnabled: boolean; imageSmoothingQuality?: "low" | "medium" | "high" };
-  smoothCtx.imageSmoothingEnabled = scale < 1;
+  smoothCtx.imageSmoothingEnabled = true;
   smoothCtx.imageSmoothingQuality = "high";
   ctx.drawImage(isoCanvas, offsetX + isoLeft * scale, offsetY + isoTop * scale, isoCanvas.width * scale, isoCanvas.height * scale);
-  smoothCtx.imageSmoothingEnabled = true;
 
   for (let i = 0; i < n; i++) {
     drawMarker(ctx, offsetX + i * PITCH * scale, offsetY + (i * PITCH / 2 + W) * scale + MARKER_R + 4, MARKER_R, markerFor(i), rc);
