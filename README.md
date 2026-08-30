@@ -8,6 +8,7 @@ Built on [obelisk.js](https://github.com/nosir/obelisk.js) and [node-canvas](htt
 
 An [Artists & Robots](https://artistsandrobots.com) project by [Jason Alan Snyder](https://evilrobot.com).
 
+[![CI](https://github.com/evil-robot/stax/actions/workflows/ci.yml/badge.svg)](https://github.com/evil-robot/stax/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
 
 ---
@@ -249,8 +250,8 @@ renderChart({ ...spec, palette: [0x6366F1, 0x4F46E5, 0x4338CA, 0x3730A3] });
 obelisk.js is a browser-only library — it expects `window`, `document`, and a real DOM canvas. stax bridges the gap:
 
 1. A [JSDOM](https://github.com/jsdom/jsdom) environment is created and patched so that `document.createElement('canvas')` returns a [node-canvas](https://github.com/Automattic/node-canvas) surface instead of a DOM element
-2. obelisk.js is evaluated inside this environment via `eval()` on the bundled `obelisk.min.js`
-3. The isometric cubes are rendered onto the node-canvas surface
+2. obelisk.js is evaluated inside this environment via `eval()` on the bundled `obelisk.min.js`, with the browser globals it expects installed only for the duration of that synchronous evaluation
+3. The isometric cubes are rendered onto the node-canvas surface — again with the globals scoped to the synchronous render, then restored
 4. A second full-size canvas composes the two-column layout: chart, legend card, title, markers, and brand strip
 5. `canvas.toBuffer('image/png')` returns the final PNG as a Node.js `Buffer`
 
@@ -263,6 +264,12 @@ ChartSpec
 ```
 
 The JSDOM instance and obelisk.js evaluation are lazy and cached — the first call takes ~50ms to initialize, subsequent calls render in ~10ms.
+
+### Process safety
+
+Some server-side SDKs refuse to run in a "browser-like environment": the Anthropic SDK, the Neon serverless driver, and others check for a global `window` object and throw if they find one. stax never leaks one. `window`, `document`, `Image`, and `HTMLCanvasElement` are installed on `globalThis` only while a synchronous obelisk operation is running and restored in a `finally` before `renderChart` returns. Rendering never awaits, so no other code on the event loop can observe them. You can render charts and construct these SDK clients in the same process, in any order.
+
+This guarantee is enforced by a regression test (`npm test`) that runs in CI on every push.
 
 ---
 

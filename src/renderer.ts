@@ -457,6 +457,15 @@ function drawBrandStrip(
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
+/**
+ * Render an isometric stacked-cube bar chart as a PNG Buffer.
+ *
+ * Synchronous and process-safe: the browser globals obelisk.js needs are
+ * installed only for the duration of the render and restored before this
+ * function returns, so SDKs with browser-detection guards (Anthropic, Neon,
+ * and others) keep working in the same process. Verified by
+ * `test/verify-no-global-leak.ts` (`npm test`).
+ */
 export function renderChart(spec: ChartSpec): Buffer {
   ensureObelisk();
   ensureFontsRegistered();
