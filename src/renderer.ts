@@ -40,14 +40,61 @@ interface ObeliskAPI {
 
 let _obelisk: ObeliskAPI | null = null;
 
+// ─── Scoped browser globals ───────────────────────────────────────────────────
+// obelisk.js reaches for browser globals: it assigns itself to `window.obelisk`
+// at load, and calls `document.createElement("canvas")` at RENDER time (inside
+// its CanvasManager). Installing window/document on globalThis permanently would
+// poison the host process — SDKs with browser-detection guards (Anthropic, Neon,
+// and others) refuse to run once they see a window object, and stay broken until
+// restart. So the globals are installed only for the duration of each
+// SYNCHRONOUS obelisk operation (the one-time eval and each render), then the
+// prior global state is restored in a finally. Because that work never awaits,
+// the event loop cannot yield while the globals are live, so no other code in
+// the host process ever observes them.
+let _obeliskWindow: { document: unknown; Image: unknown; HTMLCanvasElement: unknown } | null = null;
+let _obeliskDocument: unknown = null;
+
+const GLOBAL_KEYS = ["window", "document", "Image", "HTMLCanvasElement"] as const;
+type SavedGlobals = Record<(typeof GLOBAL_KEYS)[number], PropertyDescriptor | undefined>;
+
+function installObeliskGlobals(): SavedGlobals {
+  const g = globalThis as unknown as Record<string, unknown>;
+  const saved = {} as SavedGlobals;
+  for (const key of GLOBAL_KEYS) saved[key] = Object.getOwnPropertyDescriptor(g, key);
+  const w = _obeliskWindow!;
+  g.window = w;
+  g.document = _obeliskDocument;
+  g.Image = w.Image;
+  g.HTMLCanvasElement = w.HTMLCanvasElement;
+  return saved;
+}
+
+function restoreGlobals(saved: SavedGlobals) {
+  const g = globalThis as unknown as Record<string, unknown>;
+  for (const key of GLOBAL_KEYS) {
+    const desc = saved[key];
+    if (desc) Object.defineProperty(g, key, desc);
+    else delete g[key];
+  }
+}
+
+// Run a synchronous obelisk operation with the browser globals installed, then
+// always restore the prior global state. MUST stay synchronous — any await inside
+// `fn` would expose the globals to other code on the event loop.
+function withObeliskGlobals<T>(fn: () => T): T {
+  const saved = installObeliskGlobals();
+  try {
+    return fn();
+  } finally {
+    restoreGlobals(saved);
+  }
+}
+
 function ensureObelisk(): ObeliskAPI {
   if (_obelisk) return _obelisk;
   const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
-  const g = globalThis as unknown as Record<string, unknown>;
-  g.window = dom.window;
-  g.document = dom.window.document;
-  g.Image = dom.window.Image;
-  g.HTMLCanvasElement = dom.window.HTMLCanvasElement;
+  _obeliskWindow = dom.window as unknown as { document: unknown; Image: unknown; HTMLCanvasElement: unknown };
+  _obeliskDocument = dom.window.document;
   const origCreate = dom.window.document.createElement.bind(dom.window.document);
   (dom.window.document as unknown as { createElement: (t: string) => unknown }).createElement = function (tag: string) {
     if (typeof tag === "string" && tag.toLowerCase() === "canvas") {
@@ -69,10 +116,14 @@ function ensureObelisk(): ObeliskAPI {
     }
     return origCreate(tag);
   };
-  const obeliskCode = readFileSync(join(__dirname, "vendor/obelisk.min.js"), "utf8");
-  // eslint-disable-next-line no-eval
-  (0, eval)(obeliskCode);
-  _obelisk = (dom.window as unknown as { obelisk: ObeliskAPI }).obelisk;
+  // obelisk assigns itself to window.obelisk during eval, so the globals must be
+  // installed for the (synchronous) eval, then immediately restored.
+  withObeliskGlobals(() => {
+    const obeliskCode = readFileSync(join(__dirname, "vendor/obelisk.min.js"), "utf8");
+    // eslint-disable-next-line no-eval
+    (0, eval)(obeliskCode);
+    _obelisk = (dom.window as unknown as { obelisk: ObeliskAPI }).obelisk;
+  });
   if (!_obelisk) throw new Error("obelisk.js failed to load");
   return _obelisk;
 }
@@ -407,9 +458,14 @@ function drawBrandStrip(
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 export function renderChart(spec: ChartSpec): Buffer {
-  const ob = ensureObelisk();
+  ensureObelisk();
   ensureFontsRegistered();
+  // Install the browser globals only for the synchronous render, then tear them
+  // down — see withObeliskGlobals. Nothing here awaits, so the globals never leak.
+  return withObeliskGlobals(() => renderChartInner(spec, _obelisk as ObeliskAPI));
+}
 
+function renderChartInner(spec: ChartSpec, ob: ObeliskAPI): Buffer {
   const rc = resolveColors(spec);
   const labels = Array.isArray(spec.labels) ? spec.labels : [];
   const values = Array.isArray(spec.values) ? spec.values.map(Number) : [];

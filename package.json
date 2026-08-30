@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "build": "tsc && cp -r src/vendor dist/vendor",
+    "test": "ts-node test/verify-no-global-leak.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
