@@ -13,7 +13,7 @@ jobs:
         if: matrix.fonts == 'system'
         run: apt-get update -qq && apt-get install -y -qq fontconfig fonts-dejavu-core > /dev/null && fc-list | wc -l
       - name: Install
-        run: npm ci --ignore-scripts && npm run build
+        run: npm ci
       - name: Render probes
         run: |
           cat > probe.js <<'JS'
