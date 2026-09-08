@@ -46,7 +46,10 @@ export const COLOR = {
 };
 
 // ─── Typography ──────────────────────────────────────────────────────────────
-export const FONT_FAMILY = "'IsoChart Sans', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif";
+// One family, no fallback list. On Linux, Pango rendered every bold glyph as a hex box when the
+// registered family was followed by fallbacks; the same font alone renders correctly. If the
+// registration ever fails, fontconfig still resolves the unknown name to the system sans.
+export const FONT_FAMILY = "'IsoChart Sans'";
 
 export const TYPE = {
   family: FONT_FAMILY,

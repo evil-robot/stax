@@ -39,8 +39,15 @@ jobs:
           line(8, "600 28px B3", "bold ttf declared 700, asked 600");
           line(9, "bold 28px 'Inter Bold'", "by internal name Inter Bold (unregistered alias)");
           line(10, "700 28px sans-serif", "system sans-serif 700");
+          const c2 = createCanvas(900, 140); const x = c2.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, 900, 140); x.fillStyle = "#000";
+          x.font = "700 28px 'F', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif"; x.fillText("A. bold with family LIST: Carver MN 2.39", 12, 40);
+          x.font = "700 28px 'F'"; x.fillText("B. bold single family: Carver MN 2.39", 12, 80);
+          x.font = "400 28px 'F', 'Inter', sans-serif"; x.fillText("C. regular with family list: Carver MN 2.39", 12, 120);
+          fs.writeFileSync("probe-list.png", c2.toBuffer("image/png"));
+          const { renderChart } = require("./dist");
+          fs.writeFileSync("probe-stax.png", renderChart({ title: "Stax after the single-family fix", labels: ["Carver, MN", "Howard, MD", "Johnson, KS"], values: [2.4, 2.4, 2.4], descriptions: ["2.39", "2.42", "2.43"], unit: "", accentColor: "#1A3A6E", brandText: "liveordiehere.com probe", width: 900, height: 480 }));
           fs.writeFileSync("probe-matrix.png", c.toBuffer("image/png"));
           JS
           node probe.js
       - uses: actions/upload-artifact@v4
-        with: { name: "probes-${{ matrix.fonts }}", path: "probe-matrix.png" }
+        with: { name: "probes-${{ matrix.fonts }}", path: "probe-*.png" }
