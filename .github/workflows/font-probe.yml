@@ -19,20 +19,28 @@ jobs:
           cat > probe.js <<'JS'
           const { createCanvas, registerFont } = require("canvas");
           const fs = require("fs");
-          function draw(name, family) {
-            const c = createCanvas(700, 90); const ctx = c.getContext("2d");
-            ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 700, 90);
-            ctx.fillStyle = "#000"; ctx.font = `700 28px ${family}`; ctx.fillText(`${name}: The safest counties, Carver MN 2.39`, 12, 55);
-            fs.writeFileSync(`probe-${name}.png`, c.toBuffer("image/png"));
-          }
-          draw("nofont", "sans-serif");
-          try { registerFont(require.resolve("@fontsource/inter/files/inter-latin-700-normal.woff"), { family: "ProbeWoff", weight: "700" }); } catch (e) { console.log("woff register failed", e.message); }
-          draw("woff", "ProbeWoff, sans-serif");
-          registerFont("fonts/Inter-Bold.ttf", { family: "ProbeTtf", weight: "700" });
-          draw("ttf", "ProbeTtf, sans-serif");
-          const { renderChart } = require("./dist");
-          fs.writeFileSync("probe-stax.png", renderChart({ title: "Stax with bundled TTF", labels: ["Carver, MN", "Howard, MD", "Johnson, KS"], values: [2.4, 2.4, 2.4], descriptions: ["2.39", "2.42", "2.43"], unit: "", accentColor: "#1A3A6E", brandText: "liveordiehere.com probe", width: 900, height: 480 }));
+          const c = createCanvas(900, 420); const ctx = c.getContext("2d");
+          ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 900, 420); ctx.fillStyle = "#000";
+          const line = (n, font, label) => { ctx.font = font; ctx.fillText(`${n}. ${label}: Carver MN 2.39 CATEGORIES`, 12, 40 * n); };
+          registerFont("fonts/Inter-Bold.ttf", { family: "B1" });
+          line(1, "28px B1", "bold ttf as plain family, no weight asked");
+          registerFont("fonts/Inter-Bold.ttf", { family: "B2", weight: "bold" });
+          line(2, "bold 28px B2", "bold ttf declared bold, asked bold");
+          registerFont("fonts/Inter-Regular.ttf", { family: "R" });
+          line(3, "700 28px R", "regular ttf, asked 700 (synthetic)");
+          line(4, "28px R", "regular ttf, asked normal");
+          registerFont("fonts/Inter-Regular.ttf", { family: "F", weight: "400" });
+          registerFont("fonts/Inter-Bold.ttf", { family: "F", weight: "700" });
+          line(5, "400 28px F", "family F 400");
+          line(6, "700 28px F", "family F 700");
+          registerFont("fonts/Inter-SemiBold.ttf", { family: "S" });
+          line(7, "28px S", "semibold ttf plain family");
+          registerFont("fonts/Inter-Bold.ttf", { family: "B3", weight: "700", style: "normal" });
+          line(8, "600 28px B3", "bold ttf declared 700, asked 600");
+          line(9, "bold 28px 'Inter Bold'", "by internal name Inter Bold (unregistered alias)");
+          line(10, "700 28px sans-serif", "system sans-serif 700");
+          fs.writeFileSync("probe-matrix.png", c.toBuffer("image/png"));
           JS
           node probe.js
       - uses: actions/upload-artifact@v4
-        with: { name: "probes-${{ matrix.fonts }}", path: "probe-*.png" }
+        with: { name: "probes-${{ matrix.fonts }}", path: "probe-matrix.png" }
