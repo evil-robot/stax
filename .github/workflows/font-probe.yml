@@ -1,0 +1,38 @@
+name: font-probe
+on: { workflow_dispatch: {} }
+jobs:
+  probe:
+    strategy:
+      matrix:
+        fonts: [none, system]
+    runs-on: ubuntu-latest
+    container: node:22-bookworm-slim
+    steps:
+      - uses: actions/checkout@v4
+      - name: System fonts (matrix)
+        if: matrix.fonts == 'system'
+        run: apt-get update -qq && apt-get install -y -qq fontconfig fonts-dejavu-core > /dev/null && fc-list | wc -l
+      - name: Install
+        run: npm ci --ignore-scripts && npm run build
+      - name: Render probes
+        run: |
+          cat > probe.js <<'JS'
+          const { createCanvas, registerFont } = require("canvas");
+          const fs = require("fs");
+          function draw(name, family) {
+            const c = createCanvas(700, 90); const ctx = c.getContext("2d");
+            ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, 700, 90);
+            ctx.fillStyle = "#000"; ctx.font = `700 28px ${family}`; ctx.fillText(`${name}: The safest counties, Carver MN 2.39`, 12, 55);
+            fs.writeFileSync(`probe-${name}.png`, c.toBuffer("image/png"));
+          }
+          draw("nofont", "sans-serif");
+          try { registerFont(require.resolve("@fontsource/inter/files/inter-latin-700-normal.woff"), { family: "ProbeWoff", weight: "700" }); } catch (e) { console.log("woff register failed", e.message); }
+          draw("woff", "ProbeWoff, sans-serif");
+          registerFont("fonts/Inter-Bold.ttf", { family: "ProbeTtf", weight: "700" });
+          draw("ttf", "ProbeTtf, sans-serif");
+          const { renderChart } = require("./dist");
+          fs.writeFileSync("probe-stax.png", renderChart({ title: "Stax with bundled TTF", labels: ["Carver, MN", "Howard, MD", "Johnson, KS"], values: [2.4, 2.4, 2.4], descriptions: ["2.39", "2.42", "2.43"], unit: "", accentColor: "#1A3A6E", brandText: "liveordiehere.com probe", width: 900, height: 480 }));
+          JS
+          node probe.js
+      - uses: actions/upload-artifact@v4
+        with: { name: "probes-${{ matrix.fonts }}", path: "probe-*.png" }

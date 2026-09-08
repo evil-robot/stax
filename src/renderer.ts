@@ -8,16 +8,36 @@ import type { ChartSpec } from "./types";
 
 // ─── Font registration ────────────────────────────────────────────────────────
 let fontsRegistered = false;
+/**
+ * Register Inter under the family the tokens use. Prefer the TrueType files shipped in
+ * ../fonts: on Linux servers with no system fonts, Pango failed to draw glyphs from the
+ * WOFF subsets in @fontsource/inter and every character rendered as a hex box. The WOFF
+ * files remain as a fallback when the fonts folder is not present.
+ */
 function ensureFontsRegistered() {
   if (fontsRegistered) return;
   fontsRegistered = true;
-  const weights: Array<{ file: string; weight: "400" | "500" | "600" | "700" }> = [
+  const ttf: Array<{ file: string; weight: "400" | "500" | "600" | "700" }> = [
+    { file: "Inter-Regular.ttf", weight: "400" },
+    { file: "Inter-Medium.ttf", weight: "500" },
+    { file: "Inter-SemiBold.ttf", weight: "600" },
+    { file: "Inter-Bold.ttf", weight: "700" },
+  ];
+  const fontsDir = join(__dirname, "..", "fonts");
+  let registered = 0;
+  for (const { file, weight } of ttf) {
+    const p = join(fontsDir, file);
+    if (!existsSync(p)) continue;
+    try { registerFont(p, { family: "IsoChart Sans", weight }); registered++; } catch { /* try the next */ }
+  }
+  if (registered > 0) return;
+  const woff: Array<{ file: string; weight: "400" | "500" | "600" | "700" }> = [
     { file: "inter-latin-400-normal.woff", weight: "400" },
     { file: "inter-latin-500-normal.woff", weight: "500" },
     { file: "inter-latin-600-normal.woff", weight: "600" },
     { file: "inter-latin-700-normal.woff", weight: "700" },
   ];
-  for (const { file, weight } of weights) {
+  for (const { file, weight } of woff) {
     try {
       const p = require.resolve(`@fontsource/inter/files/${file}`);
       if (existsSync(p)) registerFont(p, { family: "IsoChart Sans", weight });
